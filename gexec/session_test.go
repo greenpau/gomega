@@ -94,6 +94,13 @@ var _ = Describe("Session", func() {
 			Ω(session).ShouldNot(Exit(), "Should not exit immediately...")
 			Eventually(session).Should(Exit(128 + 9))
 		})
+
+		It("should ignore killing the session if the command did not start", func() {
+			session, err := Start(exec.Command("notexisting"), GinkgoWriter, GinkgoWriter)
+			Expect(err).To(HaveOccurred())
+
+			Expect(func() { session.Kill() }).NotTo(Panic())
+		})
 	})
 
 	Describe("interrupt", func() {
@@ -126,6 +133,13 @@ var _ = Describe("Session", func() {
 			session.Signal(syscall.SIGABRT)
 			Ω(session).ShouldNot(Exit(), "Should not exit immediately...")
 			Eventually(session).Should(Exit(128 + 6))
+		})
+
+		It("should ignore sending a signal if the command did not start", func() {
+			session, err := Start(exec.Command("notexisting"), GinkgoWriter, GinkgoWriter)
+			Expect(err).To(HaveOccurred())
+
+			Expect(func() { session.Signal(syscall.SIGUSR1) }).NotTo(Panic())
 		})
 	})
 
